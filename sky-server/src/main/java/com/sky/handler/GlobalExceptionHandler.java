@@ -36,6 +36,10 @@ public class GlobalExceptionHandler {
             String rtn_msg = "用户名" + msg.split(" ")[2] + "已经存在，请修改用户名！";
             log.error(rtn_msg);
             return Result.error(rtn_msg);
+        } else if (msg.contains("Duplicate entry") && msg.contains(DBConstant.DB_CAT_KEY_CATEGORY_NAME)) {
+            String rtn_msg = "分类名" + msg.split(" ")[2] + "已经存在，请修改！";
+            log.error(rtn_msg);
+            return Result.error(rtn_msg);
         }
         return Result.error("Unknown Error!");
     }
