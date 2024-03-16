@@ -33,4 +33,6 @@ public interface DishMapper {
 
     @Autofill(OperationType.UPDATE)
     void update(Dish dish);
+
+    List<Dish> listByCategoryId(Long categoryId);
 }
