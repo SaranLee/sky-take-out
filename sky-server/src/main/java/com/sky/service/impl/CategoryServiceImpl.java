@@ -7,7 +7,10 @@ import com.sky.context.BaseContext;
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
 import com.sky.entity.Category;
+import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.CategoryMapper;
+import com.sky.mapper.DishMapper;
+import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.CategoryService;
 import org.springframework.beans.BeanUtils;
@@ -16,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -23,6 +27,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private CategoryMapper categoryMapper;
 
+    @Autowired
+    private DishMapper dishMapper;
+
+    @Autowired
+    private SetmealMapper setmealMapper;
 
     /**
      * 分页查询分类
@@ -44,8 +53,6 @@ public class CategoryServiceImpl implements CategoryService {
     public void updateById(CategoryDTO categoryDTO) {
         Category category = new Category();
         BeanUtils.copyProperties(categoryDTO, category);
-        category.setUpdateTime(LocalDateTime.now());
-        category.setUpdateUser(BaseContext.getCurrentId());
         categoryMapper.update(category);
     }
 
@@ -54,10 +61,6 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = new Category();
         BeanUtils.copyProperties(categoryDTO, category);
         category.setStatus(StatusConstant.DISABLE);
-        category.setCreateTime(LocalDateTime.now());
-        category.setUpdateTime(LocalDateTime.now());
-        category.setCreateUser(BaseContext.getCurrentId());
-        category.setUpdateUser(BaseContext.getCurrentId());
         categoryMapper.add(category);
     }
 
@@ -67,5 +70,19 @@ public class CategoryServiceImpl implements CategoryService {
         category.setId(id);
         category.setStatus(status);
         categoryMapper.update(category);
+    }
+
+    @Override
+    public void delete(Long id) {
+        // 首先检查分类下是否还存在菜品和套餐，如果存在，不能删除分类
+        if (!dishMapper.hasDishesInCategory(id) && !setmealMapper.hasSetmealsInCategory(id))
+            categoryMapper.deleteById(id);
+        else
+            throw new DeletionNotAllowedException("该分类下有菜品或套餐，无法删除！");
+    }
+
+    @Override
+    public List<Category> queryByType(Integer type) {
+        return categoryMapper.queryByType(type);
     }
 }

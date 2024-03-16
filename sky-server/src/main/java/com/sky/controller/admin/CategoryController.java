@@ -2,6 +2,7 @@ package com.sky.controller.admin;
 
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
+import com.sky.entity.Category;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.CategoryService;
@@ -12,6 +13,8 @@ import net.bytebuddy.implementation.bind.annotation.IgnoreForBinding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin/category")
@@ -49,4 +52,19 @@ public class CategoryController {
         categoryService.enableOrDisable(status, id);
         return Result.success();
     }
+
+    @DeleteMapping("")
+    @ApiOperation("删除分类")
+    public Result delete(Long id) {
+        categoryService.delete(id);
+        return Result.success();
+    }
+
+    @GetMapping("/list")
+    @ApiOperation("根据类型查询分类")
+    public Result<List<Category>> list(Integer type){
+        List<Category> list = categoryService.queryByType(type);
+        return Result.success(list);
+    }
+
 }
