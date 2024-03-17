@@ -8,6 +8,7 @@ import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
+import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
@@ -49,5 +50,50 @@ public class SetmealServiceImpl implements SetmealService {
         for (SetmealDish setmealDish : setmealDishes)
             setmealDish.setSetmealId(setmeal.getId());
         setmealDishMapper.insertBatch(setmealDishes);
+    }
+
+    @Override
+    public void enableOrDisable(Integer status, Long id) {
+        Setmeal setmeal = new Setmeal();
+        setmeal.setStatus(status);
+        setmeal.setId(id);
+        setmealMapper.update(setmeal);
+    }
+
+    @Override
+    public SetmealVO getByIdWithSetmealDished(Long id) {
+        SetmealVO setmealVO = new SetmealVO();
+        // 首先获取setmeal信息，填充VO
+        Setmeal setmeal = setmealMapper.getById(id);
+        BeanUtils.copyProperties(setmeal, setmealVO);
+        // 然后获取setmeal_dish信息，填充VO
+        List<SetmealDish> setmealDishes = setmealDishMapper.getBySetmealId(id);
+        setmealVO.setSetmealDishes(setmealDishes);
+        return setmealVO;
+    }
+
+    @Transactional
+    public void update(SetmealDTO dto) {
+        Setmeal setmeal = new Setmeal();
+        BeanUtils.copyProperties(dto, setmeal);
+        // 首先修改setmeal表
+        setmealMapper.update(setmeal);
+        // 然后修改setmeal_dish表：先删除所有setmealDish，再重新插入
+        setmealDishMapper.deleteBySetmealId(dto.getId());
+        List<SetmealDish> setmealDishes = dto.getSetmealDishes();
+        for (SetmealDish setmealDish : setmealDishes)
+            setmealDish.setSetmealId(dto.getId());
+        setmealDishMapper.insertBatch(setmealDishes);
+    }
+
+    @Transactional
+    public void deleteByIds(List<Long> ids) {
+        // 判断能不能删除：被启用不能被删除
+        if (setmealMapper.areEnabled(ids))
+            throw new DeletionNotAllowedException("存在起售套餐，不能删除！");
+        // 先删除setmeal表中数据
+        setmealMapper.deleteByIds(ids);
+        // 然后删除setmeal_dish表中数据
+        setmealDishMapper.deleteBySetmealIds(ids);
     }
 }

@@ -9,6 +9,7 @@ import com.sky.vo.SetmealVO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,4 +26,14 @@ public interface SetmealMapper {
 
     @Autofill(OperationType.INSERT)
     void add(Setmeal setmeal);
+
+    @Autofill(OperationType.UPDATE)
+    void update(Setmeal setmeal);
+
+    @Select("select * from setmeal where id = #{id}")
+    Setmeal getById(Long id);
+
+    boolean areEnabled(List<Long> ids);
+
+    void deleteByIds(List<Long> ids);
 }

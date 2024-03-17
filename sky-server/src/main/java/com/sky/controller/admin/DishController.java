@@ -65,4 +65,11 @@ public class DishController {
         List<Dish> dishes = dishService.listByCategoryId(categoryId);
         return Result.success(dishes);
     }
+
+    @PostMapping("/status/{status}")
+    @ApiOperation("起售、停售菜品")
+    public Result enableOrDisable(@PathVariable Integer status, Long id) {
+        dishService.enableOrDisable(status, id);
+        return Result.success();
+    }
 }

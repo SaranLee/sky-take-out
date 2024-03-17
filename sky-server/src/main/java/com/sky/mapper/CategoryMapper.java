@@ -32,4 +32,7 @@ public interface CategoryMapper {
 
     @Select("select * from category where type = #{type} order by sort")
     List<Category> queryByType(Integer type);
+
+    @Select("select status from category where id = #{id}")
+    boolean isEnabled(Long id);
 }

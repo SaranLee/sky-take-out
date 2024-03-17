@@ -74,7 +74,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void delete(Long id) {
-        // 首先检查分类下是否还存在菜品和套餐，如果存在，不能删除分类
+        // 首先检查分类是否被启用
+        if (categoryMapper.isEnabled(id) )
+            throw new DeletionNotAllowedException("分类被启用，不能删除！");
+        // 检查分类下是否还存在菜品和套餐，如果存在，不能删除分类
         if (!dishMapper.hasDishesInCategory(id) && !setmealMapper.hasSetmealsInCategory(id))
             categoryMapper.deleteById(id);
         else
