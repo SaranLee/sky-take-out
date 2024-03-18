@@ -30,8 +30,7 @@ public interface CategoryMapper {
     @Delete("delete from category where id = #{id}")
     void deleteById(Long id);
 
-    @Select("select * from category where type = #{type} order by sort")
-    List<Category> queryByType(Integer type);
+    List<Category> listByType(Integer type);
 
     @Select("select status from category where id = #{id}")
     boolean isEnabled(Long id);

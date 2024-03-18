@@ -29,4 +29,12 @@
         </set>
         where id = #{id}
     </update>
+
+    <select id="listByType" resultType="Category">
+        select * from category
+        <where>
+            <if test="type != null">and type = #{type}</if>
+        </where>
+        order by sort
+    </select>
 </mapper>
